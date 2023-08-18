@@ -18,7 +18,6 @@ contract EscrowERC20 is Ownable {
 
     function withdraw(address[] memory tokenAddresses, uint256[] memory amounts, address[] memory recipients) external onlyOwner {
         require(tokenAddresses.length == amounts.length && amounts.length == recipients.length, "Input lengths do not match");
-        
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
             IERC20(tokenAddresses[i]).transfer(recipients[i], amounts[i]);
             emit WithdrawnERC20(recipients[i], tokenAddresses[i], amounts[i]);

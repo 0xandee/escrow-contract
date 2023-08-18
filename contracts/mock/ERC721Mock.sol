@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ERC721Mock is ERC721Enumerable, Ownable {
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
 
-    function mint(address to, uint256 tokenId) public onlyOwner {
+    function mint(address to, uint256 tokenId) public {
         _mint(to, tokenId);
     }
 }
