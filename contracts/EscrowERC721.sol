@@ -5,42 +5,21 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract EscrowERC721 is Context, Ownable {
-    IERC721 public nft;
+contract EscrowERC721 is Ownable {
     
-    // address tokenOwner => uint256 balance
-    mapping(address => uint256) public balanceOf;
+    event DepositedERC721(address indexed depositor, address indexed nftAddress, uint256 tokenId);
+    event WithdrawnERC721(address indexed recipient, address indexed nftAddress, uint256 tokenId);
 
-    // uint256 tokenId => address tokenOwner
-    mapping(uint256 => address) public stakedTokens;
-
-    event Deposited(address indexed tokenOwner, uint256 indexed tokenId);
-    event Withdrawn(address indexed tokenOwner, uint256 indexed tokenId);
-
-    constructor(address nftAddress) {
-        nft = IERC721(nftAddress);
-    }
-    
-    function deposit(uint256 tokenId) external {
-        nft.transferFrom(msg.sender, address(this), tokenId);
-
-        // Tracking the owner of the deposited token
-        stakedTokens[tokenId] = msg.sender;
-        balanceOf[msg.sender]++;
-
-        emit Deposited(msg.sender, tokenId);
+    function deposit(address contractAddress, uint256 tokenId) external {
+        IERC721(contractAddress).transferFrom(msg.sender, address(this), tokenId);
+        emit DepositedERC721(msg.sender, contractAddress, tokenId);
     }
 
-    function withdraw(uint256[] calldata tokenIds) external onlyOwner {
-        for (uint i = 0; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
-            address tokenOwner = stakedTokens[tokenId];
-            require(tokenOwner != address(0), "Token is not staked.");
-
-            delete stakedTokens[tokenId];
-            balanceOf[tokenOwner]--;
-            nft.transferFrom(address(this), tokenOwner, tokenId);
-            emit Withdrawn(tokenOwner, tokenId);
+    function withdraw(address[] memory contractAddresses, uint256[] memory tokenIds, address[] memory recipients) external onlyOwner {
+        require(contractAddresses.length == tokenIds.length && tokenIds.length == recipients.length, "Input lengths do not match");
+        for (uint256 i = 0; i < contractAddresses.length; i++) {
+            IERC721(contractAddresses[i]).transferFrom(address(this), recipients[i], tokenIds[i]);
+            emit WithdrawnERC721(recipients[i], contractAddresses[i], tokenIds[i]);
         }
     }
 }
