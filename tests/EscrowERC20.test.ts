@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+import { ethers, upgrades } from "hardhat";
+import { expect } from "chai";
 
 describe("EscrowERC20", function () {
     let owner, addr1, addr2, erc20, escrowERC20;
@@ -11,7 +11,8 @@ describe("EscrowERC20", function () {
 
         // Deploy the EscrowERC20 contract
         const EscrowERC20 = await ethers.getContractFactory("EscrowERC20");
-        escrowERC20 = await EscrowERC20.deploy();
+        // escrowERC20 = await EscrowERC20.deploy();
+        escrowERC20 = await upgrades.deployProxy(EscrowERC20, { initializer: 'initialize' });
 
         [owner, addr1, addr2] = await ethers.getSigners();
         // Transfer some tokens to addr1

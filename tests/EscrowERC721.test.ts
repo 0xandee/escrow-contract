@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { EscrowERC721, ERC721Mock } from "../types";
 import { Signer } from "ethers";
@@ -17,7 +17,8 @@ describe("EscrowERC721", function () {
         erc721Mock = await ERC721MockFactory.connect(owner).deploy("TestToken", "TT");
 
         const EscrowERC721Factory = await ethers.getContractFactory("EscrowERC721");
-        escrowERC721 = await EscrowERC721Factory.connect(owner).deploy();
+        // escrowERC721 = await EscrowERC721Factory.connect(owner).deploy();
+        escrowERC721 = await upgrades.deployProxy(EscrowERC721Factory, { initializer: 'initialize' });
     });
 
     describe("Deposit", function () {
